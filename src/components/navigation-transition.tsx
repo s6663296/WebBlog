@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const MIN_VISIBLE_MS = 260;
 
@@ -49,7 +49,6 @@ function shouldStartTransition(event: MouseEvent) {
 
 export function NavigationTransition() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isActive, setIsActive] = useState(false);
   const startedAtRef = useRef<number | null>(null);
   const hideTimerRef = useRef<number | null>(null);
@@ -95,7 +94,7 @@ export function NavigationTransition() {
         hideTimerRef.current = null;
       }
     };
-  }, [pathname, searchParams, isActive]);
+  }, [pathname, isActive]);
 
   return (
     <div className={`route-transition-layer${isActive ? " is-active" : ""}`} aria-hidden="true">
