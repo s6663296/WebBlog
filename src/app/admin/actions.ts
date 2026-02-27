@@ -1,11 +1,21 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { clearAdminSession, requireAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_HOME_PAGE_TEXTS, toProfileView } from "@/lib/types";
+
+const MAX_AVATAR_FILE_SIZE = 900 * 1024;
+const AVATAR_MIME_MAP: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
 
 const postSchema = z.object({
   id: z.string().optional(),
@@ -117,6 +127,63 @@ function withQuery(pathname: string, query: string) {
 export async function logoutAction() {
   await clearAdminSession();
   redirect("/admin/login");
+}
+
+export async function updateAvatarAction(formData: FormData) {
+  await requireAdminSession();
+
+  const file = formData.get("avatar");
+  if (!(file instanceof File) || file.size === 0) {
+    redirect("/admin?error=avatar_missing");
+  }
+
+  if (file.size > MAX_AVATAR_FILE_SIZE) {
+    redirect("/admin?error=avatar_size");
+  }
+
+  const extension = AVATAR_MIME_MAP[file.type];
+  if (!extension) {
+    redirect("/admin?error=avatar_type");
+  }
+
+  const profile = await getEditableProfile();
+  const uploadDir = join(process.cwd(), "public", "uploads", "avatars");
+  const filename = `avatar-${Date.now()}-${randomUUID().slice(0, 8)}.${extension}`;
+  const avatarUrl = `/uploads/avatars/${filename}`;
+  const nextPath = join(uploadDir, filename);
+
+  try {
+    await mkdir(uploadDir, { recursive: true });
+    const data = await file.arrayBuffer();
+    await writeFile(nextPath, Buffer.from(data));
+  } catch {
+    redirect("/admin?error=avatar_write");
+  }
+
+  const previousAvatarPath =
+    profile.avatarUrl && profile.avatarUrl.startsWith("/uploads/avatars/")
+      ? join(process.cwd(), "public", profile.avatarUrl.replace(/^\//, ""))
+      : null;
+
+  await prisma.profile.upsert({
+    where: { id: "main" },
+    update: {
+      avatarUrl,
+    },
+    create: {
+      id: "main",
+      ...getProfilePayload(profile),
+      avatarUrl,
+    },
+  });
+
+  if (previousAvatarPath) {
+    await unlink(previousAvatarPath).catch(() => undefined);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  redirect("/admin?saved=avatar");
 }
 
 export async function createPostAction(formData: FormData) {

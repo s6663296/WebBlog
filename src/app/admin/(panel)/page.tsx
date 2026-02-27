@@ -5,6 +5,7 @@ import {
   deletePostAction,
   deleteProjectAction,
   deleteSkillAction,
+  updateAvatarAction,
   updateHeroSectionAction,
   updateMetaSectionAction,
   updatePostAction,
@@ -14,6 +15,7 @@ import {
   updateSkillsSectionTextAction,
 } from "@/app/admin/actions";
 import { AdminSubmitButton } from "@/components/admin-submit-button";
+import { ProfileAvatar } from "@/components/profile-avatar";
 import { ProjectLinkPreview } from "@/components/project-link-preview";
 import { prisma } from "@/lib/prisma";
 import { toProfileView } from "@/lib/types";
@@ -37,6 +39,7 @@ function getSchoolList(value?: string): string[] {
 
 const messageMap: Record<string, string> = {
   "saved=hero": "首頁主視覺已更新。",
+  "saved=avatar": "個人照片已更新。",
   "saved=meta": "基本資訊已更新。",
   "saved=skills_text": "技能區塊文案已更新。",
   "saved=projects_text": "專案區塊標題已更新。",
@@ -56,6 +59,10 @@ const errorMap: Record<string, string> = {
   slug: "標題無法生成有效 slug，請調整後再試。",
   slug_exists: "slug 已存在，請修改標題或 slug。",
   missing_post: "找不到指定文章。",
+  avatar_missing: "請選擇要上傳的照片檔案。",
+  avatar_size: "照片太大，請上傳 900KB 以下的檔案。",
+  avatar_type: "僅支援 JPG、PNG、WebP 格式。",
+  avatar_write: "照片上傳失敗，請稍後再試。",
 };
 
 type AdminDashboardPageProps = {
@@ -192,22 +199,49 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
         <p className="inline-flex rounded-full border border-cyan-200/20 bg-cyan-300/10 px-3 py-1 text-xs tracking-wide text-cyan-200">
           {texts.heroBadge}
         </p>
-        <h1 className="mt-5 max-w-3xl text-3xl leading-tight text-white md:text-5xl">
-          {profile.name}
-          <span className="block text-cyan-200">{profile.role}</span>
-        </h1>
-        <p className="mt-5 max-w-2xl text-base text-slate-300 md:text-lg">{profile.bio}</p>
+        <div className="mt-5 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h1 className="max-w-3xl text-3xl leading-tight text-white md:text-5xl">
+              {profile.name}
+              <span className="block text-cyan-200">{profile.role}</span>
+            </h1>
+            <p className="mt-5 max-w-2xl text-base text-slate-300 md:text-lg">{profile.bio}</p>
 
-        <div className="mt-8 flex flex-wrap gap-3">
-          <button type="button" className="rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950">
-            {texts.primaryCtaLabel}
-          </button>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button type="button" className="rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950">
+                {texts.primaryCtaLabel}
+              </button>
+            </div>
+          </div>
+
+          <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="lg" />
         </div>
       </section>
 
       <section className="space-y-4">
         <details className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
           <summary className="cursor-pointer text-sm text-cyan-200">編輯基本資料元件</summary>
+
+          <form action={updateAvatarAction} encType="multipart/form-data" className="mt-4 rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-center gap-3">
+                <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="md" />
+                <p className="text-xs text-slate-400">個人照片建議使用 1:1，檔案上限 900KB。</p>
+              </div>
+
+              <div className="flex w-full flex-col gap-3 md:w-auto md:min-w-[21rem]">
+                <input
+                  type="file"
+                  name="avatar"
+                  accept="image/png,image/jpeg,image/webp"
+                  required
+                  className="w-full rounded-xl border border-white/15 bg-slate-950/70 px-3 py-2 text-sm text-slate-200 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-cyan-300 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-slate-900 hover:file:bg-cyan-200"
+                />
+                <AdminSubmitButton idleLabel="上傳個人照片" loadingLabel="上傳中..." />
+              </div>
+            </div>
+          </form>
+
           <form action={updateMetaSectionAction} className="mt-4 grid gap-4 md:grid-cols-3">
             <label className="block text-sm text-slate-200" htmlFor="meta-school">
               學歷（可多筆，每行一筆）

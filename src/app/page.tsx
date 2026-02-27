@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AmbientBackground } from "@/components/ambient-background";
 import { ProjectLinkPreview } from "@/components/project-link-preview";
+import { ProfileAvatar } from "@/components/profile-avatar";
 import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -42,19 +43,25 @@ export default async function Home() {
             <p className="inline-flex rounded-full border border-cyan-200/20 bg-cyan-300/10 px-3 py-1 text-xs tracking-wide text-cyan-200">
               {texts.heroBadge}
             </p>
-            <h1 className="mt-5 max-w-3xl text-3xl leading-tight text-white md:text-5xl">
-              {profile.name}
-              <span className="block text-cyan-200">{profile.role}</span>
-            </h1>
-            <p className="mt-5 max-w-2xl text-base text-slate-300 md:text-lg">{profile.bio}</p>
+            <div className="mt-5 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h1 className="max-w-3xl text-3xl leading-tight text-white md:text-5xl">
+                  {profile.name}
+                  <span className="block text-cyan-200">{profile.role}</span>
+                </h1>
+                <p className="mt-5 max-w-2xl text-base text-slate-300 md:text-lg">{profile.bio}</p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/blog"
-                className="cursor-pointer rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors duration-200 hover:bg-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
-              >
-                {texts.primaryCtaLabel}
-              </Link>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link
+                    href="/blog"
+                    className="cursor-pointer rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors duration-200 hover:bg-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+                  >
+                    {texts.primaryCtaLabel}
+                  </Link>
+                </div>
+              </div>
+
+              <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="lg" />
             </div>
           </section>
         </Reveal>
