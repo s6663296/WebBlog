@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #05060d;
+  --surface: #0c1020;
+  --surface-soft: #10182e;
+  --text-main: #e6ecff;
+  --text-muted: #9aa8d1;
+  --line: rgba(191, 219, 254, 0.14);
+  --brand: #67e8f9;
+  --brand-strong: #22d3ee;
+}
+
+@theme inline {
+  --font-sans: var(--font-body);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: radial-gradient(circle at 15% -5%, rgba(34, 211, 238, 0.16), transparent 35%),
+    radial-gradient(circle at 85% 0%, rgba(129, 140, 248, 0.18), transparent 28%),
+    var(--bg);
+  color: var(--text-main);
+  font-family: var(--font-body), sans-serif;
+  line-height: 1.65;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: inherit;
+}
+
+.ambient-wrap {
+  position: relative;
+  min-height: 100vh;
+  overflow: clip;
+  --spotlight-x: 50%;
+  --spotlight-y: 50%;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.ambient-orb-1 {
+  top: 12%;
+  left: -6%;
+  width: 20rem;
+  height: 20rem;
+  background: rgba(34, 211, 238, 0.38);
+  animation: orbit-one 12s ease-in-out infinite alternate;
+}
+
+.ambient-orb-2 {
+  top: 0;
+  right: -4%;
+  width: 18rem;
+  height: 18rem;
+  background: rgba(129, 140, 248, 0.35);
+  animation: orbit-two 14s ease-in-out infinite alternate;
+}
+
+.ambient-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 80%);
+}
+
+.ambient-spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--spotlight-x) var(--spotlight-y), rgba(103, 232, 249, 0.16), transparent 28%);
+  transition: background-position 120ms linear;
+}
+
+.glass-panel {
+  border: 1px solid var(--line);
+  background: linear-gradient(130deg, rgba(10, 15, 30, 0.9), rgba(15, 24, 45, 0.75));
+  backdrop-filter: blur(10px);
+}
+
+.prose-dark {
+  color: var(--text-main);
+}
+
+.prose-dark h2,
+.prose-dark h3 {
+  margin-top: 1.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-dark p,
+.prose-dark li {
+  color: #d4dcf5;
+}
+
+.prose-dark ul {
+  list-style: disc;
+  margin-left: 1.2rem;
+}
+
+.prose-dark code {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.375rem;
+  padding: 0.05rem 0.35rem;
+}
+
+.reveal-enter {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: reveal-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--reveal-delay, 0s);
+}
+
+@keyframes orbit-one {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(2rem, -1.5rem, 0) scale(1.12);
+  }
+}
+
+@keyframes orbit-two {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-2.5rem, 2rem, 0) scale(1.08);
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .ambient-orb-1,
+  .ambient-orb-2 {
+    width: 14rem;
+    height: 14rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-orb {
+    animation: none;
+  }
+
+  .ambient-spotlight {
+    display: none;
+  }
+
+  .reveal-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
