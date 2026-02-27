@@ -45,7 +45,6 @@ const projectSchema = z.object({
 
 const skillsSectionTextSchema = z.object({
   skillsTitle: z.string().trim().min(2),
-  skillsHint: z.string().trim().min(2),
 });
 
 const projectsSectionTextSchema = z.object({
@@ -339,7 +338,6 @@ export async function updateSkillsSectionTextAction(formData: FormData) {
 
   const parsed = skillsSectionTextSchema.safeParse({
     skillsTitle: readString(formData, "skillsTitle"),
-    skillsHint: readString(formData, "skillsHint"),
   });
 
   if (!parsed.success) {
@@ -354,7 +352,6 @@ export async function updateSkillsSectionTextAction(formData: FormData) {
       homepageTexts: {
         ...profile.homepageTexts,
         skillsTitle: parsed.data.skillsTitle,
-        skillsHint: parsed.data.skillsHint,
       },
     },
     create: {
@@ -363,7 +360,6 @@ export async function updateSkillsSectionTextAction(formData: FormData) {
       homepageTexts: {
         ...profile.homepageTexts,
         skillsTitle: parsed.data.skillsTitle,
-        skillsHint: parsed.data.skillsHint,
       },
     },
   });

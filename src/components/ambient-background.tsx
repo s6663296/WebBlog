@@ -29,11 +29,16 @@ export function AmbientBackground({ children }: AmbientBackgroundProps) {
 
   return (
     <div ref={containerRef} className="ambient-wrap">
+      <div aria-hidden className="ambient-aurora" />
+      <div aria-hidden className="ambient-grid" />
+      <div aria-hidden className="ambient-stars" />
       <div aria-hidden className="ambient-orb ambient-orb-1" />
       <div aria-hidden className="ambient-orb ambient-orb-2" />
+      <div aria-hidden className="ambient-orb ambient-orb-3" />
+      <div aria-hidden className="ambient-rings" />
       <div aria-hidden className="ambient-noise" />
       <div aria-hidden className="ambient-spotlight" />
-      {children}
+      <div className="ambient-content">{children}</div>
     </div>
   );
 }

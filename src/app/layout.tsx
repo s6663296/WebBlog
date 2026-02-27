@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_TC, Space_Grotesk } from "next/font/google";
 import { getSiteTitle } from "@/lib/site-title";
+import { IntroOverlay } from "@/components/intro-overlay";
 import { NavigationTransition } from "@/components/navigation-transition";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="zh-Hant">
       <body className={`${headingFont.variable} ${bodyFont.variable} antialiased`}>
+        <IntroOverlay />
         {children}
         <NavigationTransition />
       </body>

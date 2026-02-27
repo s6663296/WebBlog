@@ -7,7 +7,6 @@ export async function getHomeData() {
     prisma.post.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
-      take: 4,
     }),
   ]);
 

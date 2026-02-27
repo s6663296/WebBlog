@@ -14,6 +14,7 @@ import {
   updateSkillsSectionTextAction,
 } from "@/app/admin/actions";
 import { AdminSubmitButton } from "@/components/admin-submit-button";
+import { ProjectLinkPreview } from "@/components/project-link-preview";
 import { prisma } from "@/lib/prisma";
 import { toProfileView } from "@/lib/types";
 
@@ -24,6 +25,14 @@ function getTags(value: unknown): string[] {
 
 function toTagsInput(value: unknown) {
   return getTags(value).join(", ");
+}
+
+function getSchoolList(value?: string): string[] {
+  if (!value) return [];
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 const messageMap: Record<string, string> = {
@@ -89,6 +98,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
 
   const profile = toProfileView(profileRaw);
   const texts = profile.homepageTexts;
+  const schools = getSchoolList(profile.school);
 
   return (
     <section className="space-y-6">
@@ -200,10 +210,11 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
           <summary className="cursor-pointer text-sm text-cyan-200">編輯基本資料元件</summary>
           <form action={updateMetaSectionAction} className="mt-4 grid gap-4 md:grid-cols-3">
             <label className="block text-sm text-slate-200" htmlFor="meta-school">
-              學歷
-              <input
+              學歷（可多筆，每行一筆）
+              <textarea
                 id="meta-school"
                 name="school"
+                rows={3}
                 defaultValue={profile.school ?? ""}
                 className="mt-2 w-full rounded-xl border border-white/15 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none ring-cyan-300 transition focus-visible:ring-2"
               />
@@ -237,7 +248,15 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
         <div className="grid gap-6 md:grid-cols-3">
           <article className="glass-panel rounded-2xl p-5">
             <h2 className="text-lg text-white">學歷</h2>
-            <p className="mt-2 text-sm text-slate-300">{profile.school ?? "尚未填寫"}</p>
+            {schools.length > 0 ? (
+              <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                {schools.map((school, index) => (
+                  <li key={`${school}-${index}`}>{school}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-slate-300">尚未填寫</p>
+            )}
           </article>
           <article className="glass-panel rounded-2xl p-5">
             <h2 className="text-lg text-white">所在地</h2>
@@ -266,17 +285,6 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
               />
             </label>
 
-            <label className="block text-sm text-slate-200" htmlFor="skills-hint">
-              技能區塊說明
-              <input
-                id="skills-hint"
-                name="skillsHint"
-                required
-                defaultValue={texts.skillsHint}
-                className="mt-2 w-full rounded-xl border border-white/15 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none ring-cyan-300 transition focus-visible:ring-2"
-              />
-            </label>
-
             <div className="md:col-span-2">
               <AdminSubmitButton idleLabel="儲存技能區塊文案" loadingLabel="儲存中..." />
             </div>
@@ -298,7 +306,6 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
 
         <div className="flex items-end justify-between gap-4">
           <h2 className="text-2xl text-white">{texts.skillsTitle}</h2>
-          <span className="text-sm text-slate-400">{texts.skillsHint}</span>
         </div>
 
         <div className="mt-5 flex flex-wrap gap-3">
@@ -442,16 +449,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
 
                 <h3 className="text-lg text-white">{project.name}</h3>
                 <p className="mt-2 text-sm text-slate-300">{project.description}</p>
-                {project.url ? (
-                  <a
-                    href={project.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-4 inline-flex text-sm text-cyan-200 transition-colors hover:text-cyan-100"
-                  >
-                    查看專案
-                  </a>
-                ) : null}
+                {project.url ? <ProjectLinkPreview url={project.url} /> : null}
               </article>
             ))
           ) : (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AmbientBackground } from "@/components/ambient-background";
+import { ProjectLinkPreview } from "@/components/project-link-preview";
 import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -13,10 +14,23 @@ function getTags(value: unknown): string[] {
   return value.filter((tag): tag is string => typeof tag === "string");
 }
 
+function getSchoolList(value?: string): string[] {
+  if (!value) return [];
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export default async function Home() {
   const { profile, posts } = await getHomeData();
   await recordPostImpressions(posts.map((post: (typeof posts)[number]) => post.id));
   const texts = profile.homepageTexts;
+  const schools = getSchoolList(profile.school);
+  const featuredProjects = profile.projects.slice(0, 4);
+  const moreProjects = profile.projects.slice(4);
+  const featuredPosts = posts.slice(0, 4);
+  const morePosts = posts.slice(4);
 
   return (
     <AmbientBackground>
@@ -48,7 +62,15 @@ export default async function Home() {
         <section className="mt-10 grid gap-6 md:grid-cols-3">
           <Reveal delay={0.05} className="glass-panel rounded-2xl p-5">
             <h2 className="text-lg text-white">學歷</h2>
-            <p className="mt-2 text-sm text-slate-300">{profile.school ?? "尚未填寫"}</p>
+            {schools.length > 0 ? (
+              <ul className="mt-2 space-y-1 text-sm text-slate-300">
+                {schools.map((school, index) => (
+                  <li key={`${school}-${index}`}>{school}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-slate-300">尚未填寫</p>
+            )}
           </Reveal>
           <Reveal delay={0.1} className="glass-panel rounded-2xl p-5">
             <h2 className="text-lg text-white">所在地</h2>
@@ -64,7 +86,6 @@ export default async function Home() {
           <section className="mt-10 glass-panel rounded-3xl p-6 md:p-8">
             <div className="flex items-end justify-between gap-4">
               <h2 className="text-2xl text-white">{texts.skillsTitle}</h2>
-              <span className="text-sm text-slate-400">{texts.skillsHint}</span>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
               {profile.skills.length > 0 ? (
@@ -89,30 +110,39 @@ export default async function Home() {
                 <h2 className="text-2xl text-white">{texts.projectsTitle}</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {profile.projects.length > 0 ? (
-                profile.projects.map((project) => (
+              {featuredProjects.length > 0 ? (
+                featuredProjects.map((project) => (
                   <article
                     key={project.name}
                     className="glass-panel rounded-2xl p-5 transition-all duration-200 hover:border-cyan-200/30 hover:shadow-[0_20px_50px_rgba(34,211,238,0.12)]"
                   >
                     <h3 className="text-lg text-white">{project.name}</h3>
                     <p className="mt-2 text-sm text-slate-300">{project.description}</p>
-                    {project.url ? (
-                      <a
-                        href={project.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-4 inline-flex cursor-pointer text-sm text-cyan-200 transition-colors duration-200 hover:text-cyan-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
-                      >
-                        查看專案
-                      </a>
-                    ) : null}
+                    {project.url ? <ProjectLinkPreview url={project.url} /> : null}
                   </article>
                 ))
               ) : (
                 <p className="text-sm text-slate-400">尚未新增專案資料</p>
               )}
             </div>
+
+            {moreProjects.length > 0 ? (
+              <details className="mt-4 rounded-2xl border border-white/10 bg-slate-950/35 p-4">
+                <summary className="cursor-pointer text-sm text-cyan-200">展開更多專案（{moreProjects.length}）</summary>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  {moreProjects.map((project, index) => (
+                    <article
+                      key={`more-${project.name}-${index}`}
+                      className="glass-panel rounded-2xl p-5 transition-all duration-200 hover:border-cyan-200/30 hover:shadow-[0_20px_50px_rgba(34,211,238,0.12)]"
+                    >
+                      <h3 className="text-lg text-white">{project.name}</h3>
+                      <p className="mt-2 text-sm text-slate-300">{project.description}</p>
+                      {project.url ? <ProjectLinkPreview url={project.url} /> : null}
+                    </article>
+                  ))}
+                </div>
+              </details>
+            ) : null}
           </section>
         </Reveal>
 
@@ -125,8 +155,8 @@ export default async function Home() {
                 </Link>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {posts.length > 0 ? (
-                posts.map((post: (typeof posts)[number]) => (
+              {featuredPosts.length > 0 ? (
+                featuredPosts.map((post: (typeof posts)[number]) => (
                   <Link
                     key={post.id}
                     href={`/blog/go/${post.slug}`}
@@ -156,6 +186,40 @@ export default async function Home() {
                 <p className="text-sm text-slate-400">目前尚無已發佈文章。</p>
               )}
             </div>
+
+            {morePosts.length > 0 ? (
+              <details className="mt-4 rounded-2xl border border-white/10 bg-slate-950/35 p-4">
+                <summary className="cursor-pointer text-sm text-cyan-200">展開更多文章（{morePosts.length}）</summary>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  {morePosts.map((post: (typeof posts)[number]) => (
+                    <Link
+                      key={`more-${post.id}`}
+                      href={`/blog/go/${post.slug}`}
+                      prefetch={false}
+                      className="group glass-panel cursor-pointer rounded-2xl p-5 transition-all duration-200 hover:border-cyan-200/30 hover:shadow-[0_20px_50px_rgba(34,211,238,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+                    >
+                      <p className="text-xs uppercase tracking-wide text-slate-400">
+                        {new Intl.DateTimeFormat("zh-TW", { dateStyle: "medium" }).format(post.createdAt)}
+                      </p>
+                      <h3 className="mt-2 text-xl text-white transition-colors duration-200 group-hover:text-cyan-100">
+                        {post.title}
+                      </h3>
+                      <p className="mt-2 text-sm text-slate-300">{post.excerpt}</p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {getTags(post.tags).map((tag) => (
+                          <span
+                            key={`${post.id}-${tag}`}
+                            className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            ) : null}
           </section>
         </Reveal>
       </main>
