@@ -17,6 +17,10 @@ function readSiteTitle(value: unknown) {
 }
 
 export const getSiteTitle = cache(async () => {
-  const profile = await prisma.profile.findUnique({ where: { id: "main" } });
-  return readSiteTitle((profile as { homepageTexts?: unknown } | null)?.homepageTexts);
+  try {
+    const profile = await prisma.profile.findUnique({ where: { id: "main" } });
+    return readSiteTitle((profile as { homepageTexts?: unknown } | null)?.homepageTexts);
+  } catch {
+    return DEFAULT_HOME_PAGE_TEXTS.siteTitle;
+  }
 });
