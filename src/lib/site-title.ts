@@ -1,5 +1,4 @@
 import { cache } from "react";
-import { prisma } from "@/lib/prisma";
 import { DEFAULT_HOME_PAGE_TEXTS } from "@/lib/types";
 
 function readSiteTitle(value: unknown) {
@@ -18,6 +17,7 @@ function readSiteTitle(value: unknown) {
 
 export const getSiteTitle = cache(async () => {
   try {
+    const { prisma } = await import("@/lib/prisma");
     const profile = await prisma.profile.findUnique({ where: { id: "main" } });
     return readSiteTitle((profile as { homepageTexts?: unknown } | null)?.homepageTexts);
   } catch {
