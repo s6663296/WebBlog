@@ -17,7 +17,7 @@ export function ProfileAvatar({ name, avatarUrl, size = "md" }: ProfileAvatarPro
     size === "sm"
       ? "h-16 w-16 rounded-xl"
       : size === "lg"
-        ? "h-28 w-28 rounded-2xl md:h-36 md:w-36 md:rounded-3xl"
+        ? "h-32 w-32 rounded-2xl md:h-40 md:w-40 md:rounded-3xl"
         : "h-20 w-20 rounded-2xl";
 
   const containerClass = `${sizeClass} relative shrink-0 overflow-hidden border border-cyan-200/30 bg-slate-900/70 shadow-[0_14px_28px_rgba(34,211,238,0.15)]`;
@@ -25,7 +25,7 @@ export function ProfileAvatar({ name, avatarUrl, size = "md" }: ProfileAvatarPro
   if (avatarUrl?.startsWith("/")) {
     return (
       <div className={containerClass}>
-        <Image src={avatarUrl} alt={`${name} avatar`} fill sizes="(max-width: 768px) 112px, 144px" className="object-cover" />
+        <Image src={avatarUrl} alt={`${name} avatar`} fill sizes="(max-width: 768px) 128px, 160px" className="object-cover" />
       </div>
     );
   }

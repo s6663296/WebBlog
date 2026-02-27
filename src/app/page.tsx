@@ -39,29 +39,29 @@ export default async function Home() {
 
       <main className="mx-auto w-[min(1120px,calc(100%-2rem))] pb-16 pt-20">
         <Reveal>
-          <section className="glass-panel rounded-3xl px-6 py-10 md:px-12 md:py-14">
+          <section className="glass-panel relative overflow-hidden rounded-3xl px-6 py-10 md:px-12 md:py-14">
             <p className="inline-flex rounded-full border border-cyan-200/20 bg-cyan-300/10 px-3 py-1 text-xs tracking-wide text-cyan-200">
               {texts.heroBadge}
             </p>
-            <div className="mt-5 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-              <div>
-                <h1 className="max-w-3xl text-3xl leading-tight text-white md:text-5xl">
-                  {profile.name}
-                  <span className="block text-cyan-200">{profile.role}</span>
-                </h1>
-                <p className="mt-5 max-w-2xl text-base text-slate-300 md:text-lg">{profile.bio}</p>
-
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link
-                    href="/blog"
-                    className="cursor-pointer rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors duration-200 hover:bg-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
-                  >
-                    {texts.primaryCtaLabel}
-                  </Link>
-                </div>
-              </div>
-
+            <div className="absolute right-4 top-5 sm:right-6 sm:top-6 md:right-10 md:top-10">
               <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="lg" />
+            </div>
+
+            <div className="mt-5 pr-36 md:pr-52">
+              <h1 className="max-w-3xl text-3xl leading-tight text-white md:text-5xl">
+                {profile.name}
+                <span className="block text-cyan-200">{profile.role}</span>
+              </h1>
+              <p className="mt-5 max-w-2xl text-base text-slate-300 md:text-lg">{profile.bio}</p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/blog"
+                  className="cursor-pointer rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors duration-200 hover:bg-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+                >
+                  {texts.primaryCtaLabel}
+                </Link>
+              </div>
             </div>
           </section>
         </Reveal>

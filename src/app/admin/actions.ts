@@ -10,7 +10,7 @@ import { clearAdminSession, requireAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_HOME_PAGE_TEXTS, toProfileView } from "@/lib/types";
 
-const MAX_AVATAR_FILE_SIZE = 900 * 1024;
+const MAX_AVATAR_FILE_SIZE = 25 * 1024 * 1024;
 const AVATAR_MIME_MAP: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",

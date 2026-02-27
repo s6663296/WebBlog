@@ -60,7 +60,7 @@ const errorMap: Record<string, string> = {
   slug_exists: "slug 已存在，請修改標題或 slug。",
   missing_post: "找不到指定文章。",
   avatar_missing: "請選擇要上傳的照片檔案。",
-  avatar_size: "照片太大，請上傳 900KB 以下的檔案。",
+  avatar_size: "照片太大，請上傳 25MB 以下的檔案。",
   avatar_type: "僅支援 JPG、PNG、WebP 格式。",
   avatar_write: "照片上傳失敗，請稍後再試。",
 };
@@ -121,7 +121,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
         </p>
       ) : null}
 
-      <section className="glass-panel rounded-3xl px-6 py-10 md:px-12 md:py-14">
+      <section className="glass-panel relative overflow-hidden rounded-3xl px-6 py-10 md:px-12 md:py-14">
         <details className="mb-6 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
           <summary className="cursor-pointer text-sm text-cyan-200">編輯主視覺元件</summary>
           <form action={updateHeroSectionAction} className="mt-4 space-y-4">
@@ -199,22 +199,22 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
         <p className="inline-flex rounded-full border border-cyan-200/20 bg-cyan-300/10 px-3 py-1 text-xs tracking-wide text-cyan-200">
           {texts.heroBadge}
         </p>
-        <div className="mt-5 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h1 className="max-w-3xl text-3xl leading-tight text-white md:text-5xl">
-              {profile.name}
-              <span className="block text-cyan-200">{profile.role}</span>
-            </h1>
-            <p className="mt-5 max-w-2xl text-base text-slate-300 md:text-lg">{profile.bio}</p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button type="button" className="rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950">
-                {texts.primaryCtaLabel}
-              </button>
-            </div>
-          </div>
-
+        <div className="absolute right-4 top-5 sm:right-6 sm:top-6 md:right-10 md:top-10">
           <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="lg" />
+        </div>
+
+        <div className="mt-5 pr-36 md:pr-52">
+          <h1 className="max-w-3xl text-3xl leading-tight text-white md:text-5xl">
+            {profile.name}
+            <span className="block text-cyan-200">{profile.role}</span>
+          </h1>
+          <p className="mt-5 max-w-2xl text-base text-slate-300 md:text-lg">{profile.bio}</p>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            <button type="button" className="rounded-xl bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950">
+              {texts.primaryCtaLabel}
+            </button>
+          </div>
         </div>
       </section>
 
@@ -226,7 +226,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
                 <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="md" />
-                <p className="text-xs text-slate-400">個人照片建議使用 1:1，檔案上限 900KB。</p>
+                <p className="text-xs text-slate-400">個人照片建議使用 1:1，檔案上限 25MB。</p>
               </div>
 
               <div className="flex w-full flex-col gap-3 md:w-auto md:min-w-[21rem]">
