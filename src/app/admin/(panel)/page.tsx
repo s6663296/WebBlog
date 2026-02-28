@@ -15,11 +15,14 @@ import {
   updateSkillsSectionTextAction,
 } from "@/app/admin/actions";
 import { AdminSubmitButton } from "@/components/admin-submit-button";
+import { AdminPostDraftGuard } from "@/components/admin-post-draft-guard";
 import { MarkdownImageUploader } from "@/components/markdown-image-uploader";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { ProjectLinkPreview } from "@/components/project-link-preview";
 import { prisma } from "@/lib/prisma";
 import { toProfileView } from "@/lib/types";
+
+const postDraftFieldNames = ["title", "slug", "excerpt", "tags", "coverImage", "content"];
 
 function getTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -528,7 +531,8 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
             <AdminSubmitButton idleLabel="儲存文章區塊文案" loadingLabel="儲存中..." />
           </form>
 
-          <form action={createPostAction} className="mt-5 space-y-4 border-t border-white/10 pt-4">
+          <form id="new-post-form" action={createPostAction} className="mt-5 space-y-4 border-t border-white/10 pt-4">
+            <AdminPostDraftGuard formId="new-post-form" storageKey="new" fieldNames={postDraftFieldNames} />
             <input type="hidden" name="returnTo" value="/admin" />
             <label className="block text-sm text-slate-200" htmlFor="new-post-title">
               標題
@@ -594,7 +598,12 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
               <article key={post.id} className="glass-panel rounded-2xl p-5">
                 <details className="mb-4 rounded-xl border border-white/10 bg-slate-950/45 p-3">
                   <summary className="cursor-pointer text-sm text-cyan-200">編輯此文章元件</summary>
-                  <form action={updatePostAction} className="mt-3 space-y-3">
+                  <form id={`post-edit-form-${post.id}`} action={updatePostAction} className="mt-3 space-y-3">
+                    <AdminPostDraftGuard
+                      formId={`post-edit-form-${post.id}`}
+                      storageKey={post.id}
+                      fieldNames={postDraftFieldNames}
+                    />
                     <input type="hidden" name="id" value={post.id} />
                     <input type="hidden" name="returnTo" value="/admin" />
                     <label className="block text-sm text-slate-200" htmlFor={`post-title-${post.id}`}>

@@ -40,8 +40,9 @@ export async function POST(request: Request) {
     return toError(400, "僅支援 JPG、PNG、WebP、GIF 格式。");
   }
 
+  const data = Buffer.from(await file.arrayBuffer());
+
   try {
-    const data = Buffer.from(await file.arrayBuffer());
     const uploadsDir = path.join(process.cwd(), "public", "uploads", "posts");
     await mkdir(uploadsDir, { recursive: true });
 
@@ -55,8 +56,21 @@ export async function POST(request: Request) {
       url,
       fileName,
       mimeType: imageType.mimeType,
+      storage: "file",
     });
   } catch {
-    return toError(500, "圖片處理失敗，請稍後再試。");
+    try {
+      const url = `data:${imageType.mimeType};base64,${data.toString("base64")}`;
+
+      return NextResponse.json({
+        url,
+        fileName: file.name,
+        mimeType: imageType.mimeType,
+        storage: "inline",
+        message: "目前環境無法寫入檔案，已改用內嵌圖片方式。",
+      });
+    } catch {
+      return toError(500, "圖片處理失敗，請稍後再試。");
+    }
   }
 }

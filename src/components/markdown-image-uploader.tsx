@@ -9,6 +9,7 @@ type MarkdownImageUploaderProps = {
 type UploadResponse = {
   url?: string;
   message?: string;
+  storage?: "file" | "inline";
 };
 
 function toAltText(fileName: string) {
@@ -60,10 +61,24 @@ export function MarkdownImageUploader({ textareaId }: MarkdownImageUploaderProps
         body: formData,
       });
 
-      const payload = (await response.json()) as UploadResponse;
+      let payload: UploadResponse = {};
+      const contentType = response.headers.get("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        payload = (await response.json()) as UploadResponse;
+      }
 
       if (!response.ok || typeof payload.url !== "string") {
-        setStatusMessage(payload.message ?? "圖片上傳失敗，請稍後再試。");
+        if (payload.message) {
+          setStatusMessage(payload.message);
+          return;
+        }
+
+        if (response.status === 413) {
+          setStatusMessage("圖片太大，請改用較小檔案後再試。");
+          return;
+        }
+
+        setStatusMessage("圖片上傳失敗，請稍後再試。");
         return;
       }
 
@@ -80,7 +95,7 @@ export function MarkdownImageUploader({ textareaId }: MarkdownImageUploaderProps
         input.value = "";
       }
 
-      setStatusMessage("圖片已插入內容，可直接預覽與儲存。");
+      setStatusMessage(payload.message ?? "圖片已插入內容，可直接預覽與儲存。");
     } catch {
       setStatusMessage("圖片上傳失敗，請稍後再試。");
     } finally {
