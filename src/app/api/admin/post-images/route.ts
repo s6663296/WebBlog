@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { getAdminSession } from "@/lib/auth";
+import { getSupabaseStorageConfig } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
 
@@ -24,6 +23,11 @@ export async function POST(request: Request) {
     return toError(401, "請先登入後台再上傳圖片。");
   }
 
+  const storageConfig = getSupabaseStorageConfig();
+  if (!storageConfig) {
+    return toError(500, "尚未設定 Supabase Storage，請先完成環境變數設定。");
+  }
+
   const formData = await request.formData();
   const file = formData.get("image");
 
@@ -41,36 +45,34 @@ export async function POST(request: Request) {
   }
 
   const data = Buffer.from(await file.arrayBuffer());
+  const fileName = `${Date.now()}-${randomUUID()}.${imageType.extension}`;
+  const objectPath = `posts/${fileName}`;
 
   try {
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", "posts");
-    await mkdir(uploadsDir, { recursive: true });
+    const { error } = await storageConfig.client.storage.from(storageConfig.bucket).upload(objectPath, data, {
+      contentType: imageType.mimeType,
+      upsert: false,
+    });
 
-    const fileName = `${Date.now()}-${randomUUID()}.${imageType.extension}`;
-    const filePath = path.join(uploadsDir, fileName);
-    await writeFile(filePath, data);
+    if (error) {
+      return toError(500, "圖片上傳失敗，請稍後再試。");
+    }
 
-    const url = `/uploads/posts/${fileName}`;
+    const { data: publicUrlData } = storageConfig.client.storage
+      .from(storageConfig.bucket)
+      .getPublicUrl(objectPath);
+
+    if (!publicUrlData.publicUrl) {
+      return toError(500, "圖片上傳成功，但無法取得公開網址。");
+    }
 
     return NextResponse.json({
-      url,
-      fileName,
+      url: publicUrlData.publicUrl,
+      fileName: objectPath,
       mimeType: imageType.mimeType,
-      storage: "file",
+      storage: "supabase",
     });
   } catch {
-    try {
-      const url = `data:${imageType.mimeType};base64,${data.toString("base64")}`;
-
-      return NextResponse.json({
-        url,
-        fileName: file.name,
-        mimeType: imageType.mimeType,
-        storage: "inline",
-        message: "目前環境無法寫入檔案，已改用內嵌圖片方式。",
-      });
-    } catch {
-      return toError(500, "圖片處理失敗，請稍後再試。");
-    }
+    return toError(500, "圖片處理失敗，請稍後再試。");
   }
 }

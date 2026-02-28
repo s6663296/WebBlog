@@ -62,6 +62,8 @@ const errorMap: Record<string, string> = {
   validation: "欄位格式有誤，請檢查後再儲存。",
   slug: "標題無法生成有效 slug，請調整後再試。",
   slug_exists: "slug 已存在，請修改標題或 slug。",
+  image_unavailable: "偵測到尚未上傳完成的圖片，請重新上傳後再儲存。",
+  publish_failed: "發布失敗，資料未寫入資料庫，請稍後再試。",
   missing_post: "找不到指定文章。",
   avatar_missing: "請選擇要上傳的照片檔案。",
   avatar_size: "照片太大，請上傳 25MB 以下的檔案。",
@@ -226,7 +228,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
         <details className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
           <summary className="cursor-pointer text-sm text-cyan-200">編輯基本資料元件</summary>
 
-          <form action={updateAvatarAction} encType="multipart/form-data" className="mt-4 rounded-2xl border border-white/10 bg-slate-950/45 p-4">
+          <form action={updateAvatarAction} className="mt-4 rounded-2xl border border-white/10 bg-slate-950/45 p-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
                 <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="md" />

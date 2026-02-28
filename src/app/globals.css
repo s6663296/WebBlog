@@ -338,25 +338,32 @@ a {
 .route-transition-layer {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: 220;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 160ms ease;
+  transition: opacity 180ms ease;
 }
 
 .route-transition-layer.is-active {
   opacity: 1;
 }
 
+.route-transition-curtain {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 28%, rgba(34, 211, 238, 0.14), transparent 55%),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.26), rgba(2, 6, 23, 0.55));
+}
+
 .route-transition-bar {
   position: absolute;
   top: 0;
   left: 0;
-  height: 3px;
+  height: 4px;
   width: 42%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, rgba(34, 211, 238, 0.1), rgba(34, 211, 238, 1));
-  box-shadow: 0 0 18px rgba(34, 211, 238, 0.6);
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0), rgba(34, 211, 238, 1));
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.65);
   animation: route-progress 1.15s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
@@ -365,9 +372,40 @@ a {
   top: 0;
   left: 0;
   right: 0;
-  height: 58px;
-  background: linear-gradient(180deg, rgba(34, 211, 238, 0.18), transparent);
-  opacity: 0.75;
+  height: 80px;
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.24), transparent);
+  opacity: 0.82;
+}
+
+.route-transition-center {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(186, 230, 253, 0.25);
+  background: rgba(7, 12, 26, 0.72);
+  box-shadow: 0 10px 35px rgba(8, 18, 38, 0.5);
+  transform: translate(-50%, -50%);
+}
+
+.route-transition-dot {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 9999px;
+  background: #67e8f9;
+  box-shadow: 0 0 18px rgba(103, 232, 249, 0.85);
+  animation: route-dot-pulse 0.9s ease-in-out infinite;
+}
+
+.route-transition-label {
+  color: rgba(224, 242, 254, 0.9);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 @keyframes orbit-one {
@@ -477,6 +515,18 @@ a {
   }
   100% {
     transform: translateX(220%) scaleX(0.88);
+  }
+}
+
+@keyframes route-dot-pulse {
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
   }
 }
 

@@ -6,6 +6,7 @@ import { Reveal } from "@/components/reveal";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { recordPostImpressions } from "@/lib/analytics";
+import { getPostPreviewImage } from "@/lib/post-content";
 import { getHomeData } from "@/lib/site-data";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,11 @@ function getSchoolList(value?: string): string[] {
     .split(/\r?\n|,/)
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function toBackgroundImage(url: string) {
+  const escapedUrl = url.replace(/["\\]/g, "\\$&");
+  return { backgroundImage: `url("${escapedUrl}")` };
 }
 
 export default async function Home() {
@@ -163,44 +169,12 @@ export default async function Home() {
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {featuredPosts.length > 0 ? (
-                featuredPosts.map((post: (typeof posts)[number]) => (
-                  <Link
-                    key={post.id}
-                    href={`/blog/go/${post.slug}`}
-                    prefetch={false}
-                    className="group glass-panel cursor-pointer rounded-2xl p-5 transition-all duration-200 hover:border-cyan-200/30 hover:shadow-[0_20px_50px_rgba(34,211,238,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
-                  >
-                    <p className="text-xs uppercase tracking-wide text-slate-400">
-                      {new Intl.DateTimeFormat("zh-TW", { dateStyle: "medium" }).format(post.createdAt)}
-                    </p>
-                    <h3 className="mt-2 text-xl text-white transition-colors duration-200 group-hover:text-cyan-100">
-                      {post.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-slate-300">{post.excerpt}</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {getTags(post.tags).map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <p className="text-sm text-slate-400">目前尚無已發佈文章。</p>
-              )}
-            </div>
+                featuredPosts.map((post: (typeof posts)[number]) => {
+                  const previewImage = getPostPreviewImage(post.content, post.coverImage);
 
-            {morePosts.length > 0 ? (
-              <details className="mt-4 rounded-2xl border border-white/10 bg-slate-950/35 p-4">
-                <summary className="cursor-pointer text-sm text-cyan-200">展開更多文章（{morePosts.length}）</summary>
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
-                  {morePosts.map((post: (typeof posts)[number]) => (
+                  return (
                     <Link
-                      key={`more-${post.id}`}
+                      key={post.id}
                       href={`/blog/go/${post.slug}`}
                       prefetch={false}
                       className="group glass-panel cursor-pointer rounded-2xl p-5 transition-all duration-200 hover:border-cyan-200/30 hover:shadow-[0_20px_50px_rgba(34,211,238,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
@@ -211,11 +185,19 @@ export default async function Home() {
                       <h3 className="mt-2 text-xl text-white transition-colors duration-200 group-hover:text-cyan-100">
                         {post.title}
                       </h3>
+                      {previewImage ? (
+                        <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-slate-950/60">
+                          <div
+                            className="aspect-[16/9] bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03]"
+                            style={toBackgroundImage(previewImage)}
+                          />
+                        </div>
+                      ) : null}
                       <p className="mt-2 text-sm text-slate-300">{post.excerpt}</p>
                       <div className="mt-4 flex flex-wrap gap-2">
                         {getTags(post.tags).map((tag) => (
                           <span
-                            key={`${post.id}-${tag}`}
+                            key={tag}
                             className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300"
                           >
                             {tag}
@@ -223,7 +205,55 @@ export default async function Home() {
                         ))}
                       </div>
                     </Link>
-                  ))}
+                  );
+                })
+              ) : (
+                <p className="text-sm text-slate-400">目前尚無已發佈文章。</p>
+              )}
+            </div>
+
+            {morePosts.length > 0 ? (
+              <details className="mt-4 rounded-2xl border border-white/10 bg-slate-950/35 p-4">
+                <summary className="cursor-pointer text-sm text-cyan-200">展開更多文章（{morePosts.length}）</summary>
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                  {morePosts.map((post: (typeof posts)[number]) => {
+                    const previewImage = getPostPreviewImage(post.content, post.coverImage);
+
+                    return (
+                      <Link
+                        key={`more-${post.id}`}
+                        href={`/blog/go/${post.slug}`}
+                        prefetch={false}
+                        className="group glass-panel cursor-pointer rounded-2xl p-5 transition-all duration-200 hover:border-cyan-200/30 hover:shadow-[0_20px_50px_rgba(34,211,238,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"
+                      >
+                        <p className="text-xs uppercase tracking-wide text-slate-400">
+                          {new Intl.DateTimeFormat("zh-TW", { dateStyle: "medium" }).format(post.createdAt)}
+                        </p>
+                        <h3 className="mt-2 text-xl text-white transition-colors duration-200 group-hover:text-cyan-100">
+                          {post.title}
+                        </h3>
+                        {previewImage ? (
+                          <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-slate-950/60">
+                            <div
+                              className="aspect-[16/9] bg-cover bg-center transition-transform duration-300 group-hover:scale-[1.03]"
+                              style={toBackgroundImage(previewImage)}
+                            />
+                          </div>
+                        ) : null}
+                        <p className="mt-2 text-sm text-slate-300">{post.excerpt}</p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {getTags(post.tags).map((tag) => (
+                            <span
+                              key={`${post.id}-${tag}`}
+                              className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-slate-300"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </details>
             ) : null}

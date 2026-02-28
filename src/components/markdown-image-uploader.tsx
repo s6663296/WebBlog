@@ -9,7 +9,7 @@ type MarkdownImageUploaderProps = {
 type UploadResponse = {
   url?: string;
   message?: string;
-  storage?: "file" | "inline";
+  storage?: "file" | "inline" | "supabase";
 };
 
 function toAltText(fileName: string) {

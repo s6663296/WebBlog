@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { clearAdminSession, requireAdminSession } from "@/lib/auth";
+import { extractMarkdownImageUrls, normalizePostContent } from "@/lib/post-content";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_HOME_PAGE_TEXTS, toProfileView } from "@/lib/types";
 
@@ -95,6 +96,63 @@ function parseList(input?: string | null) {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function isSupabasePublicStorageUrl(url: string) {
+  const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET?.trim() || "post-images";
+
+  if (!projectUrl) {
+    return false;
+  }
+
+  return url.startsWith(`${projectUrl}/storage/v1/object/public/${bucket}/`);
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function isRemoteImageReady(url: string) {
+  const retryDelays = [0, 250, 600];
+
+  for (const delay of retryDelays) {
+    if (delay > 0) {
+      await wait(delay);
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: "HEAD",
+        cache: "no-store",
+      });
+
+      if (response.ok) {
+        return true;
+      }
+    } catch {
+      // no-op
+    }
+  }
+
+  return false;
+}
+
+async function findUnavailableUploadedImage(content: string) {
+  const imageUrls = extractMarkdownImageUrls(content);
+
+  for (const imageUrl of imageUrls) {
+    if (!isSupabasePublicStorageUrl(imageUrl)) {
+      continue;
+    }
+
+    const reachable = await isRemoteImageReady(imageUrl);
+    if (!reachable) {
+      return imageUrl;
+    }
+  }
+
+  return null;
 }
 
 function readString(formData: FormData, key: string) {
@@ -213,22 +271,32 @@ export async function createPostAction(formData: FormData) {
     redirect(withQuery(returnTo, "error=slug"));
   }
 
+  const normalizedContent = normalizePostContent(parsed.data.content);
+  const unavailableImageUrl = await findUnavailableUploadedImage(normalizedContent);
+  if (unavailableImageUrl) {
+    redirect(withQuery(returnTo, "error=image_unavailable"));
+  }
+
   const existing = await prisma.post.findUnique({ where: { slug } });
   if (existing) {
     redirect(withQuery(returnTo, "error=slug_exists"));
   }
 
-  await prisma.post.create({
-    data: {
-      title: parsed.data.title,
-      slug,
-      excerpt: parsed.data.excerpt,
-      content: parsed.data.content,
-      coverImage: parsed.data.coverImage || null,
-      tags: parseList(parsed.data.tags),
-      published: true,
-    },
-  });
+  try {
+    await prisma.post.create({
+      data: {
+        title: parsed.data.title,
+        slug,
+        excerpt: parsed.data.excerpt,
+        content: normalizedContent,
+        coverImage: parsed.data.coverImage || null,
+        tags: parseList(parsed.data.tags),
+        published: true,
+      },
+    });
+  } catch {
+    redirect(withQuery(returnTo, "error=publish_failed"));
+  }
 
   revalidatePath("/");
   revalidatePath("/blog");
@@ -265,6 +333,12 @@ export async function updatePostAction(formData: FormData) {
     redirect(withQuery(returnTo, "error=slug"));
   }
 
+  const normalizedContent = normalizePostContent(parsed.data.content);
+  const unavailableImageUrl = await findUnavailableUploadedImage(normalizedContent);
+  if (unavailableImageUrl) {
+    redirect(withQuery(returnTo, "error=image_unavailable"));
+  }
+
   const existing = await prisma.post.findFirst({
     where: {
       slug,
@@ -276,18 +350,22 @@ export async function updatePostAction(formData: FormData) {
     redirect(withQuery(returnTo, "error=slug_exists"));
   }
 
-  await prisma.post.update({
-    where: { id },
-    data: {
-      title: parsed.data.title,
-      slug,
-      excerpt: parsed.data.excerpt,
-      content: parsed.data.content,
-      coverImage: parsed.data.coverImage || null,
-      tags: parseList(parsed.data.tags),
-      published: true,
-    },
-  });
+  try {
+    await prisma.post.update({
+      where: { id },
+      data: {
+        title: parsed.data.title,
+        slug,
+        excerpt: parsed.data.excerpt,
+        content: normalizedContent,
+        coverImage: parsed.data.coverImage || null,
+        tags: parseList(parsed.data.tags),
+        published: true,
+      },
+    });
+  } catch {
+    redirect(withQuery(returnTo, "error=publish_failed"));
+  }
 
   revalidatePath("/");
   revalidatePath("/blog");

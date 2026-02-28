@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { isValidElement, useCallback, useEffect, useMemo, useState } from "react";
 import type { Components } from "react-markdown";
 import ReactMarkdown from "react-markdown";
+import { normalizePostContent } from "@/lib/post-content";
 
 type PostMarkdownProps = {
   content: string;
@@ -16,34 +17,15 @@ type ActiveImage = {
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.25;
-const IMAGE_URL_LINE_PATTERN = /^(?:https?:\/\/\S+|\/\S+)\.(?:png|jpe?g|webp|gif|avif|svg)(?:\?\S*)?$/i;
 
 function clampZoom(value: number) {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
 }
 
-function normalizeContent(content: string) {
-  return content
-    .split(/\r?\n/)
-    .map((line) => {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("![")) {
-        return line;
-      }
-
-      if (!IMAGE_URL_LINE_PATTERN.test(trimmed)) {
-        return line;
-      }
-
-      return `![文章圖片](${trimmed})`;
-    })
-    .join("\n");
-}
-
 export function PostMarkdown({ content }: PostMarkdownProps) {
   const [activeImage, setActiveImage] = useState<ActiveImage | null>(null);
   const [zoom, setZoom] = useState(1);
-  const renderedContent = useMemo(() => normalizeContent(content), [content]);
+  const renderedContent = useMemo(() => normalizePostContent(content), [content]);
 
   const closeLightbox = useCallback(() => {
     setActiveImage(null);
@@ -88,6 +70,31 @@ export function PostMarkdown({ content }: PostMarkdownProps) {
 
   const components = useMemo<Components>(
     () => ({
+      p: ({ node, children }) => {
+        const hasImageChild =
+          node &&
+          "children" in node &&
+          Array.isArray(node.children) &&
+          node.children.some((child) => "tagName" in child && child.tagName === "img");
+
+        if (hasImageChild) {
+          return <>{children}</>;
+        }
+
+        const compactChildren = Array.isArray(children)
+          ? children.filter((child) => !(typeof child === "string" && child.trim() === ""))
+          : [children];
+
+        if (
+          compactChildren.length === 1 &&
+          isValidElement(compactChildren[0]) &&
+          compactChildren[0].type === "figure"
+        ) {
+          return <>{compactChildren[0]}</>;
+        }
+
+        return <p>{children}</p>;
+      },
       img: ({ src, alt }) => {
         if (typeof src !== "string" || !src.trim()) {
           return null;
