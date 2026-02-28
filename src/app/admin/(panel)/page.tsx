@@ -15,6 +15,7 @@ import {
   updateSkillsSectionTextAction,
 } from "@/app/admin/actions";
 import { AdminSubmitButton } from "@/components/admin-submit-button";
+import { MarkdownImageUploader } from "@/components/markdown-image-uploader";
 import { ProfileAvatar } from "@/components/profile-avatar";
 import { ProjectLinkPreview } from "@/components/project-link-preview";
 import { prisma } from "@/lib/prisma";
@@ -582,6 +583,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
                 className="mt-2 w-full rounded-xl border border-white/15 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none ring-cyan-300 transition focus-visible:ring-2"
               />
             </label>
+            <MarkdownImageUploader textareaId="new-post-content" />
             <AdminSubmitButton idleLabel="新增文章" loadingLabel="新增中..." />
           </form>
         </details>
@@ -654,6 +656,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
                         className="mt-2 w-full rounded-xl border border-white/15 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none ring-cyan-300 transition focus-visible:ring-2"
                       />
                     </label>
+                    <MarkdownImageUploader textareaId={`post-content-${post.id}`} />
 
                     <div className="flex flex-wrap gap-2">
                       <AdminSubmitButton idleLabel="儲存文章" loadingLabel="儲存中..." />

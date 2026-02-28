@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
 import { AmbientBackground } from "@/components/ambient-background";
+import { PostMarkdown } from "@/components/post-markdown";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { recordPostViewBySlug } from "@/lib/analytics";
@@ -54,7 +54,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {new Intl.DateTimeFormat("zh-TW", { dateStyle: "full" }).format(post.createdAt)}
           </p>
           <div className="prose-dark mt-8 max-w-none text-base leading-7">
-            <ReactMarkdown>{post.content}</ReactMarkdown>
+            <PostMarkdown content={post.content} />
           </div>
         </article>
       </main>
