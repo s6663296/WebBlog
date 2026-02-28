@@ -35,9 +35,11 @@ export function AmbientBackground({ children }: AmbientBackgroundProps) {
       <div aria-hidden className="ambient-orb ambient-orb-1" />
       <div aria-hidden className="ambient-orb ambient-orb-2" />
       <div aria-hidden className="ambient-orb ambient-orb-3" />
-      <div aria-hidden className="ambient-rings" />
+      <div aria-hidden className="ambient-beam ambient-beam-1" />
+      <div aria-hidden className="ambient-beam ambient-beam-2" />
       <div aria-hidden className="ambient-noise" />
       <div aria-hidden className="ambient-spotlight" />
+      <div aria-hidden className="ambient-vignette" />
       <div className="ambient-content">{children}</div>
     </div>
   );

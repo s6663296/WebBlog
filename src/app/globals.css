@@ -142,19 +142,55 @@ a {
   animation: orbit-three 13s ease-in-out infinite alternate;
 }
 
-.ambient-rings {
+.ambient-beam {
   position: absolute;
-  top: 62%;
   left: 50%;
+  top: 60%;
   z-index: 4;
-  width: min(68vw, 44rem);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
+  width: min(88vw, 72rem);
+  height: clamp(8rem, 18vw, 14rem);
   border-radius: 9999px;
   pointer-events: none;
-  border: 1px solid rgba(186, 230, 253, 0.14);
-  box-shadow: 0 0 0 60px rgba(56, 189, 248, 0.04), 0 0 0 120px rgba(56, 189, 248, 0.02);
-  animation: pulse-rings 10s ease-in-out infinite;
+  filter: blur(2px);
+  mix-blend-mode: screen;
+}
+
+.ambient-beam-1 {
+  transform: translate(-50%, -50%) rotate(-8deg);
+  opacity: 0.34;
+  background: linear-gradient(
+    90deg,
+    rgba(34, 211, 238, 0),
+    rgba(34, 211, 238, 0.28) 28%,
+    rgba(59, 130, 246, 0.2) 66%,
+    rgba(59, 130, 246, 0)
+  );
+  animation: beam-sweep-one 14s ease-in-out infinite;
+}
+
+.ambient-beam-2 {
+  top: 67%;
+  width: min(74vw, 58rem);
+  height: clamp(7rem, 14vw, 11rem);
+  transform: translate(-50%, -50%) rotate(7deg);
+  opacity: 0.28;
+  background: linear-gradient(
+    90deg,
+    rgba(129, 140, 248, 0),
+    rgba(129, 140, 248, 0.25) 34%,
+    rgba(34, 211, 238, 0.18) 72%,
+    rgba(34, 211, 238, 0)
+  );
+  animation: beam-sweep-two 16s ease-in-out infinite;
+}
+
+.ambient-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 36%, transparent 0 30%, rgba(5, 6, 13, 0.24) 72%),
+    linear-gradient(180deg, rgba(5, 6, 13, 0.04), rgba(5, 6, 13, 0.52) 90%);
 }
 
 .ambient-noise {
@@ -388,15 +424,27 @@ a {
   }
 }
 
-@keyframes pulse-rings {
+@keyframes beam-sweep-one {
   0%,
   100% {
-    transform: translate(-50%, -50%) scale(0.98);
-    opacity: 0.5;
+    transform: translate(-50%, -50%) rotate(-8deg) scaleX(0.96);
+    opacity: 0.2;
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.04);
-    opacity: 0.88;
+    transform: translate(-46%, -54%) rotate(-5deg) scaleX(1.05);
+    opacity: 0.44;
+  }
+}
+
+@keyframes beam-sweep-two {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(7deg) scaleX(0.94);
+    opacity: 0.18;
+  }
+  50% {
+    transform: translate(-54%, -46%) rotate(10deg) scaleX(1.07);
+    opacity: 0.38;
   }
 }
 
@@ -481,8 +529,16 @@ a {
     height: 14rem;
   }
 
-  .ambient-rings {
-    width: min(84vw, 28rem);
+  .ambient-beam-1 {
+    width: min(118vw, 34rem);
+    top: 66%;
+    height: 9rem;
+  }
+
+  .ambient-beam-2 {
+    width: min(102vw, 28rem);
+    top: 74%;
+    height: 7.5rem;
   }
 
   .intro-kicker {
@@ -498,7 +554,7 @@ a {
     animation: none;
   }
 
-  .ambient-rings {
+  .ambient-beam {
     animation: none;
   }
 
