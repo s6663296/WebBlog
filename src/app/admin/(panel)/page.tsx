@@ -122,7 +122,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
       ) : null}
 
       <section className="glass-panel relative overflow-hidden rounded-3xl px-6 py-10 md:px-12 md:py-14">
-        <details className="mb-6 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+        <details className="peer mb-6 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
           <summary className="cursor-pointer text-sm text-cyan-200">編輯主視覺元件</summary>
           <form action={updateHeroSectionAction} className="mt-4 space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
@@ -199,12 +199,12 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
         <p className="inline-flex rounded-full border border-cyan-200/20 bg-cyan-300/10 px-3 py-1 text-xs tracking-wide text-cyan-200">
           {texts.heroBadge}
         </p>
-        <div className="absolute right-4 top-5 sm:right-6 sm:top-6 md:right-10 md:top-10">
+        <div className="absolute right-4 top-5 transition-opacity duration-200 peer-open:pointer-events-none peer-open:opacity-0 sm:right-6 sm:top-6 md:right-10 md:top-10">
           <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="lg" />
         </div>
 
-        <div className="mt-5 pr-36 md:pr-52">
-          <h1 className="max-w-3xl text-3xl leading-tight text-white md:text-5xl">
+        <div className="mt-5">
+          <h1 className="max-w-3xl pr-36 text-3xl leading-tight text-white md:pr-52 md:text-5xl">
             {profile.name}
             <span className="block text-cyan-200">{profile.role}</span>
           </h1>

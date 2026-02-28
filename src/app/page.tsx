@@ -47,8 +47,8 @@ export default async function Home() {
               <ProfileAvatar name={profile.name} avatarUrl={profile.avatarUrl} size="lg" />
             </div>
 
-            <div className="mt-5 pr-36 md:pr-52">
-              <h1 className="max-w-3xl text-3xl leading-tight text-white md:text-5xl">
+            <div className="mt-5">
+              <h1 className="max-w-3xl pr-36 text-3xl leading-tight text-white md:pr-52 md:text-5xl">
                 {profile.name}
                 <span className="block text-cyan-200">{profile.role}</span>
               </h1>
