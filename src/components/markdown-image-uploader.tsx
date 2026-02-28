@@ -107,7 +107,7 @@ export function MarkdownImageUploader({ textareaId }: MarkdownImageUploaderProps
           {isUploading ? "上傳中..." : "上傳並插入"}
         </button>
       </div>
-      <p className="mt-2 text-xs text-slate-400">{statusMessage || "上傳成功後會自動插入 Markdown 圖片語法。"}</p>
+      <p className="mt-2 text-xs text-slate-400">{statusMessage || "上傳成功後會自動插入圖片，不需要手動寫 Markdown。"}</p>
     </div>
   );
 }

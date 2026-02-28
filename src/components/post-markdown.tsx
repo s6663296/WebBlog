@@ -16,14 +16,34 @@ type ActiveImage = {
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.25;
+const IMAGE_URL_LINE_PATTERN = /^(?:https?:\/\/\S+|\/\S+)\.(?:png|jpe?g|webp|gif|avif|svg)(?:\?\S*)?$/i;
 
 function clampZoom(value: number) {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
 }
 
+function normalizeContent(content: string) {
+  return content
+    .split(/\r?\n/)
+    .map((line) => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("![")) {
+        return line;
+      }
+
+      if (!IMAGE_URL_LINE_PATTERN.test(trimmed)) {
+        return line;
+      }
+
+      return `![文章圖片](${trimmed})`;
+    })
+    .join("\n");
+}
+
 export function PostMarkdown({ content }: PostMarkdownProps) {
   const [activeImage, setActiveImage] = useState<ActiveImage | null>(null);
   const [zoom, setZoom] = useState(1);
+  const renderedContent = useMemo(() => normalizeContent(content), [content]);
 
   const closeLightbox = useCallback(() => {
     setActiveImage(null);
@@ -97,7 +117,7 @@ export function PostMarkdown({ content }: PostMarkdownProps) {
 
   return (
     <>
-      <ReactMarkdown components={components}>{content}</ReactMarkdown>
+      <ReactMarkdown components={components}>{renderedContent}</ReactMarkdown>
 
       {activeImage ? (
         <div

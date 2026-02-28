@@ -574,7 +574,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
               />
             </label>
             <label className="block text-sm text-slate-200" htmlFor="new-post-content">
-              內容（Markdown）
+              內容（可純文字，支援 Markdown）
               <textarea
                 id="new-post-content"
                 name="content"
@@ -646,7 +646,7 @@ export default async function AdminDashboardPage({ searchParams }: AdminDashboar
                       />
                     </label>
                     <label className="block text-sm text-slate-200" htmlFor={`post-content-${post.id}`}>
-                      內容（Markdown）
+                      內容（可純文字，支援 Markdown）
                       <textarea
                         id={`post-content-${post.id}`}
                         name="content"

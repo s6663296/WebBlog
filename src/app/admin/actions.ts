@@ -14,13 +14,30 @@ const AVATAR_MIME_MAP: Record<string, string> = {
   "image/webp": "image/webp",
 };
 
+function isAllowedImageReference(value: string) {
+  if (!value) {
+    return true;
+  }
+
+  return (
+    value.startsWith("http://") ||
+    value.startsWith("https://") ||
+    value.startsWith("/") ||
+    value.startsWith("data:image/")
+  );
+}
+
 const postSchema = z.object({
   id: z.string().optional(),
-  title: z.string().trim().min(3),
+  title: z.string().trim().min(1),
   slug: z.string().trim().optional(),
-  excerpt: z.string().trim().min(10),
-  content: z.string().trim().min(20),
-  coverImage: z.union([z.url(), z.literal("")]).optional(),
+  excerpt: z.string().trim().min(1),
+  content: z.string().trim().min(1),
+  coverImage: z
+    .string()
+    .trim()
+    .refine((value) => isAllowedImageReference(value), "invalid_cover_image")
+    .optional(),
   tags: z.string().trim().optional(),
 });
 

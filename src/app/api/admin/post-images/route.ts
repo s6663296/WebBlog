@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { getAdminSession } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
 const MAX_POST_IMAGE_FILE_SIZE = 8 * 1024 * 1024;
-const POST_IMAGE_MIME_MAP: Record<string, string> = {
-  "image/jpeg": "image/jpeg",
-  "image/png": "image/png",
-  "image/webp": "image/webp",
-  "image/gif": "image/gif",
+const POST_IMAGE_MIME_MAP: Record<string, { mimeType: string; extension: string }> = {
+  "image/jpeg": { mimeType: "image/jpeg", extension: "jpg" },
+  "image/png": { mimeType: "image/png", extension: "png" },
+  "image/webp": { mimeType: "image/webp", extension: "webp" },
+  "image/gif": { mimeType: "image/gif", extension: "gif" },
 };
 
 function toError(status: number, message: string) {
@@ -32,19 +35,26 @@ export async function POST(request: Request) {
     return toError(400, "檔案太大，請上傳 8MB 以下圖片。");
   }
 
-  const mimeType = POST_IMAGE_MIME_MAP[file.type];
-  if (!mimeType) {
+  const imageType = POST_IMAGE_MIME_MAP[file.type];
+  if (!imageType) {
     return toError(400, "僅支援 JPG、PNG、WebP、GIF 格式。");
   }
 
   try {
-    const data = await file.arrayBuffer();
-    const url = `data:${mimeType};base64,${Buffer.from(data).toString("base64")}`;
+    const data = Buffer.from(await file.arrayBuffer());
+    const uploadsDir = path.join(process.cwd(), "public", "uploads", "posts");
+    await mkdir(uploadsDir, { recursive: true });
+
+    const fileName = `${Date.now()}-${randomUUID()}.${imageType.extension}`;
+    const filePath = path.join(uploadsDir, fileName);
+    await writeFile(filePath, data);
+
+    const url = `/uploads/posts/${fileName}`;
 
     return NextResponse.json({
       url,
-      fileName: file.name,
-      mimeType,
+      fileName,
+      mimeType: imageType.mimeType,
     });
   } catch {
     return toError(500, "圖片處理失敗，請稍後再試。");
