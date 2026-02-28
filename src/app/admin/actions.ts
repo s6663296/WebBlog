@@ -1,8 +1,5 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -12,9 +9,9 @@ import { DEFAULT_HOME_PAGE_TEXTS, toProfileView } from "@/lib/types";
 
 const MAX_AVATAR_FILE_SIZE = 25 * 1024 * 1024;
 const AVATAR_MIME_MAP: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
+  "image/jpeg": "image/jpeg",
+  "image/png": "image/png",
+  "image/webp": "image/webp",
 };
 
 const postSchema = z.object({
@@ -141,44 +138,35 @@ export async function updateAvatarAction(formData: FormData) {
     redirect("/admin?error=avatar_size");
   }
 
-  const extension = AVATAR_MIME_MAP[file.type];
-  if (!extension) {
+  const mimeType = AVATAR_MIME_MAP[file.type];
+  if (!mimeType) {
     redirect("/admin?error=avatar_type");
   }
 
   const profile = await getEditableProfile();
-  const uploadDir = join(process.cwd(), "public", "uploads", "avatars");
-  const filename = `avatar-${Date.now()}-${randomUUID().slice(0, 8)}.${extension}`;
-  const avatarUrl = `/uploads/avatars/${filename}`;
-  const nextPath = join(uploadDir, filename);
+  let avatarUrl = "";
 
   try {
-    await mkdir(uploadDir, { recursive: true });
     const data = await file.arrayBuffer();
-    await writeFile(nextPath, Buffer.from(data));
+    avatarUrl = `data:${mimeType};base64,${Buffer.from(data).toString("base64")}`;
   } catch {
     redirect("/admin?error=avatar_write");
   }
 
-  const previousAvatarPath =
-    profile.avatarUrl && profile.avatarUrl.startsWith("/uploads/avatars/")
-      ? join(process.cwd(), "public", profile.avatarUrl.replace(/^\//, ""))
-      : null;
-
-  await prisma.profile.upsert({
-    where: { id: "main" },
-    update: {
-      avatarUrl,
-    },
-    create: {
-      id: "main",
-      ...getProfilePayload(profile),
-      avatarUrl,
-    },
-  });
-
-  if (previousAvatarPath) {
-    await unlink(previousAvatarPath).catch(() => undefined);
+  try {
+    await prisma.profile.upsert({
+      where: { id: "main" },
+      update: {
+        avatarUrl,
+      },
+      create: {
+        id: "main",
+        ...getProfilePayload(profile),
+        avatarUrl,
+      },
+    });
+  } catch {
+    redirect("/admin?error=avatar_write");
   }
 
   revalidatePath("/");
